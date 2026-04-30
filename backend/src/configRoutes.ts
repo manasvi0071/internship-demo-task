@@ -7,6 +7,21 @@ import type { AuthRequest } from "./middleware.js";
 
 const router = express.Router();
 
+// GET all configs
+router.get("/", authenticateToken, async (req: AuthRequest, res) => {
+  try {
+    const result = await pool.query(
+      "SELECT id, name, created_at FROM app_configs ORDER BY created_at DESC"
+    );
+
+    return res.json(result.rows);
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: "Could not fetch configs" });
+  }
+});
+
+// POST create new config
 router.post("/", authenticateToken, async (req: AuthRequest, res) => {
   try {
     const parsed = appConfigSchema.safeParse(req.body);
@@ -44,6 +59,7 @@ router.post("/", authenticateToken, async (req: AuthRequest, res) => {
   }
 });
 
+// GET specific config by ID
 router.get("/:id", authenticateToken, async (req, res) => {
   try {
     const result = await pool.query(
